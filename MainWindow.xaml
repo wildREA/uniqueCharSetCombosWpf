@@ -3,10 +3,152 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:uniqueCharSetCombosWpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Combination Studio"
+        Height="720"
+        Width="1120"
+        MinHeight="620"
+        MinWidth="900"
+        Background="#F4F7FB"
+        FontFamily="Segoe UI">
+    <Window.Resources>
+        <SolidColorBrush x:Key="InkBrush" Color="#17233D" />
+        <SolidColorBrush x:Key="MutedBrush" Color="#6B7892" />
+        <SolidColorBrush x:Key="LineBrush" Color="#DEE5F0" />
+        <SolidColorBrush x:Key="PanelBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="AccentBrush" Color="#159A9C" />
+        <SolidColorBrush x:Key="AccentSoftBrush" Color="#E4F5F4" />
 
+        <Style x:Key="PanelStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource PanelBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="20" />
+        </Style>
+        <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+        </Style>
+        <Style x:Key="StatValueStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+        </Style>
+        <Style x:Key="StatLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+        </Style>
+        <Style x:Key="QuietButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+            <Setter Property="Background" Value="#F7F9FC" />
+            <Setter Property="BorderBrush" Value="{StaticResource LineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="15,9" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="24" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="18" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <StackPanel>
+                <TextBlock Text="COMBINATION STUDIO" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentBrush}" />
+                <TextBlock Text="Unique character combinations" Margin="0,5,0,0" FontSize="27" FontWeight="SemiBold" Foreground="{StaticResource InkBrush}" />
+                <TextBlock Text="Prepare a character set and review generated combinations in one place." Margin="0,4,0,0" FontSize="13" Foreground="{StaticResource MutedBrush}" />
+            </StackPanel>
+            <Border HorizontalAlignment="Right" VerticalAlignment="Center" Background="{StaticResource AccentSoftBrush}" CornerRadius="16" Padding="13,7">
+                <StackPanel Orientation="Horizontal">
+                    <Ellipse Width="8" Height="8" Fill="{StaticResource AccentBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                    <TextBlock Text="READY" FontSize="11" FontWeight="Bold" Foreground="#147D80" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Style="{StaticResource PanelStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Character set source" Style="{StaticResource SectionTitleStyle}" />
+                    <TextBlock Text="Select a text file containing the characters you want to process." Margin="0,5,0,12" FontSize="12" Foreground="{StaticResource MutedBrush}" />
+                    <Border Height="38" Background="#F7F9FC" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="5" Padding="12,0">
+                        <TextBlock Text="No file selected" Foreground="#9AA6B9" FontSize="13" VerticalAlignment="Center" />
+                    </Border>
+                </StackPanel>
+                <Button Grid.Column="1" Content="Browse files" Style="{StaticResource QuietButtonStyle}" Margin="18,30,0,0" VerticalAlignment="Top" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="18" />
+                <ColumnDefinition Width="3*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <Border Style="{StaticResource PanelStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Processing status" Style="{StaticResource SectionTitleStyle}" />
+                        <Grid Margin="0,18,0,7">
+                            <TextBlock Text="Generating combinations" FontSize="12" Foreground="{StaticResource MutedBrush}" />
+                            <TextBlock Text="0%" HorizontalAlignment="Right" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource InkBrush}" />
+                        </Grid>
+                        <ProgressBar Height="9" Minimum="0" Maximum="100" Value="0" Foreground="{StaticResource AccentBrush}" Background="#E7ECF3" BorderThickness="0" />
+                        <TextBlock Text="Waiting for a character set" Margin="0,12,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <UniformGrid Columns="2" Margin="0,18,0,0">
+                    <Border Style="{StaticResource PanelStyle}" Margin="0,0,9,0">
+                        <StackPanel>
+                            <TextBlock Text="COMBINATIONS" Style="{StaticResource StatLabelStyle}" />
+                            <TextBlock Text="0" x:Name="ComboCountTextBlock" Style="{StaticResource StatValueStyle}" Margin="0,7,0,0" />
+                            <TextBlock Text="Processed" FontSize="11" Foreground="{StaticResource MutedBrush}" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource PanelStyle}" Margin="9,0,0,0">
+                        <StackPanel>
+                            <TextBlock Text="ELAPSED TIME" Style="{StaticResource StatLabelStyle}" />
+                            <TextBlock Text="00:00" x:Name="ElapsedTimeTextBlock" Style="{StaticResource StatValueStyle}" Margin="0,7,0,0" />
+                            <TextBlock Text="Since start" FontSize="11" Foreground="{StaticResource MutedBrush}" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+            </StackPanel>
+
+            <Border Grid.Column="2" Style="{StaticResource PanelStyle}" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Margin="20,18,20,14">
+                        <StackPanel>
+                            <TextBlock Text="Processed combinations" Style="{StaticResource SectionTitleStyle}" />
+                            <TextBlock Text="Output will appear here as it is generated." Margin="0,4,0,0" FontSize="12" Foreground="{StaticResource MutedBrush}" />
+                        </StackPanel>
+                        <Border HorizontalAlignment="Right" Background="#F2F5F9" CornerRadius="12" Padding="10,5">
+                            <TextBlock Text="0 items" FontSize="11" Foreground="{StaticResource MutedBrush}" />
+                        </Border>
+                    </Grid>
+                    <ScrollViewer Grid.Row="1" Margin="20,0,20,20" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <Border Background="#F8FAFC" BorderBrush="#E8EDF4" BorderThickness="1" CornerRadius="6" Padding="14">
+                            <TextBlock Text="No combinations to display yet." Foreground="#9AA6B9" FontSize="12" />
+                        </Border>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </Window>
