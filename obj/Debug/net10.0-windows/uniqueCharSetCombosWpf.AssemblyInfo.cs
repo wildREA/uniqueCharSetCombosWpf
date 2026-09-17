@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("uniqueCharSetCombosWpf")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+998c37655a9aeab4f0cbbbe11012bbfa255a090f")]
 [assembly: System.Reflection.AssemblyProductAttribute("uniqueCharSetCombosWpf")]
 [assembly: System.Reflection.AssemblyTitleAttribute("uniqueCharSetCombosWpf")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
