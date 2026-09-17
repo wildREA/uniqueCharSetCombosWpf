@@ -1,29 +1,54 @@
-using System.IO;
 using System.Buffers;
 using System.Diagnostics;
+using System.IO;
+using System.Numerics;
 
 namespace uniqueCharSetCombosWpf;
 
-public static class Program
+public sealed class ComboGenerationResult
 {
-    public static (long Count, TimeSpan, BuildTime) run_process(string target)
+    public ComboGenerationResult(
+        IReadOnlyList<string> combinations,
+        TimeSpan buildTime)
     {
-        string[] all_words = File.ReadAllLines(target);
-        string[] valid_words = purge_invalid_words(all_words);
-        
-        long combo_count = find_combos(
-            valid_words,
-            out TimeSpan elapsed);
-
-        return elapsed;
+        Combinations = combinations;
+        BuildTime = buildTime;
     }
 
-    static long find_combos(
-        string[] valid_words,
-        out TimeSpan elapsed)
-    {
-        Stopwatch sw = Stopwatch.StartNew();
+    public IReadOnlyList<string> Combinations { get; }
 
+    public int Count => Combinations.Count;
+
+    public TimeSpan BuildTime { get; }
+}
+
+public static class CharComboService
+{
+    public static ComboGenerationResult run_process(
+        string target,
+        IProgress<double>? progress = null)
+    {
+        Stopwatch total_sw = Stopwatch.StartNew();
+        progress?.Report(0);
+
+        string[] all_words = File.ReadAllLines(target);
+        string[] valid_words = purge_invalid_words(all_words);
+        progress?.Report(5);
+
+        HashSet<string> combinations = [];
+        find_combos(valid_words, combinations, progress);
+
+        total_sw.Stop();
+        progress?.Report(100);
+
+        return new ComboGenerationResult([.. combinations], total_sw.Elapsed);
+    }
+
+    private static void find_combos(
+        string[] valid_words,
+        HashSet<string> combinations,
+        IProgress<double>? progress)
+    {
         int words_per_combo = 5;
         Dictionary<char, int> char_indices = [];
         ulong[] word_masks = new ulong[valid_words.Length];
@@ -51,14 +76,14 @@ public static class Program
             word_masks[word_i] = mask;
         }
 
+        progress?.Report(10);
+
         int[] selected_indices = new int[words_per_combo];
         int[] initial_candidates = new int[valid_words.Length];
         for (int i = 0; i < initial_candidates.Length; i++)
         {
             initial_candidates[i] = i;
         }
-
-        long combo_count = 0;
 
         void build_combos(
             int[] candidates,
@@ -67,7 +92,7 @@ public static class Program
         {
             if (selected_count == words_per_combo)
             {
-                combo_count++;
+                combinations.Add(string.Join(' ', selected_indices.Select(index => valid_words[index])));
                 return;
             }
 
@@ -77,21 +102,23 @@ public static class Program
                 return;
             }
 
+            Span<int> character_counts = stackalloc int[64];
+            for (int candidate_i = 0; candidate_i < candidate_count; candidate_i++)
+            {
+                ulong remaining_mask = word_masks[candidates[candidate_i]];
+                while (remaining_mask != 0)
+                {
+                    int character_i = BitOperations.TrailingZeroCount(remaining_mask);
+                    character_counts[character_i]++;
+                    remaining_mask &= remaining_mask - 1;
+                }
+            }
+
             int pivot_character = -1;
             int pivot_count = int.MaxValue;
-
             for (int character_i = 0; character_i < char_indices.Count; character_i++)
             {
-                ulong character_bit = 1UL << character_i;
-                int count = 0;
-                for (int candidate_i = 0; candidate_i < candidate_count; candidate_i++)
-                {
-                    if ((word_masks[candidates[candidate_i]] & character_bit) != 0)
-                    {
-                        count++;
-                    }
-                }
-
+                int count = character_counts[character_i];
                 if (count > 0 && count < pivot_count)
                 {
                     pivot_character = character_i;
@@ -142,31 +169,30 @@ public static class Program
                 ArrayPool<int>.Shared.Return(next_candidates);
             }
 
-            // Exclude the pivot character from the remaining solution.
-            int[] excluded_candidates = ArrayPool<int>.Shared.Rent(Math.Max(candidate_count, 1));
-            int excluded_count = 0;
-            for (int candidate_i = 0; candidate_i < candidate_count; candidate_i++)
+            // Exclude the pivot character from the remaining solution when needed.
+            if (pivot_count < candidate_count)
             {
-                int word_i = candidates[candidate_i];
-                if ((word_masks[word_i] & pivot_bit) == 0)
+                int[] excluded_candidates = ArrayPool<int>.Shared.Rent(Math.Max(candidate_count, 1));
+                int excluded_count = 0;
+                for (int candidate_i = 0; candidate_i < candidate_count; candidate_i++)
                 {
-                    excluded_candidates[excluded_count++] = word_i;
+                    int word_i = candidates[candidate_i];
+                    if ((word_masks[word_i] & pivot_bit) == 0)
+                    {
+                        excluded_candidates[excluded_count++] = word_i;
+                    }
                 }
+
+                build_combos(excluded_candidates, excluded_count, selected_count);
+                ArrayPool<int>.Shared.Return(excluded_candidates);
             }
 
-            build_combos(excluded_candidates, excluded_count, selected_count);
-            ArrayPool<int>.Shared.Return(excluded_candidates);
         }
 
         build_combos(initial_candidates, initial_candidates.Length, 0);
-
-        sw.Stop();
-        elapsed = sw.Elapsed;
-
-        return combo_count;
     }
 
-    static string[] purge_invalid_words(
+    private static string[] purge_invalid_words(
         string[] all_words)
     {
         int allowed_length = 5;
@@ -178,7 +204,7 @@ public static class Program
         return valid_words;
     }
 
-    static bool has_duplicate_char(
+    private static bool has_duplicate_char(
         string valid_target)
     {
         var seen = new HashSet<char>();
